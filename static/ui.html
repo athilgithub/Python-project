@@ -1,0 +1,335 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>California House Price Predictor</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      
+      :root {
+        --bg-gradient-start: #f0f4f8;
+        --bg-gradient-end: #d9e2ec;
+        --container-bg: #ffffff;
+        --heading-color: #102a43;
+        --text-color: #486581;
+        --card-bg: #f7fafc;
+        --card-border: #d9e2ec;
+        --input-bg: #ffffff;
+        --input-border: #cbd2d9;
+        --input-focus: #3b82f6;
+        --btn-primary-bg: #ff6b35;
+        --btn-primary-hover: #e55a2b;
+        --btn-secondary-bg: #ffffff;
+        --btn-secondary-color: #3b82f6;
+        --btn-secondary-hover: #eff6ff;
+        --result-bg: #eff6ff;
+        --result-border: #bfdbfe;
+        --result-text: #1e3a8a;
+        --result-highlight: #3b82f6;
+        --result-placeholder: #9fb3c8;
+        --shadow: rgba(16, 42, 67, 0.12);
+        --shadow-hover: rgba(255, 107, 53, 0.3);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-gradient-start: #0a0e27;
+          --bg-gradient-end: #1a1f3a;
+          --container-bg: #1e2139;
+          --heading-color: #ffffff;
+          --text-color: #9ca3af;
+          --card-bg: #252a43;
+          --card-border: #2d3247;
+          --input-bg: #1a1d33;
+          --input-border: #2d3247;
+          --input-focus: #ff6b35;
+          --btn-primary-bg: #ff6b35;
+          --btn-primary-hover: #ff8559;
+          --btn-secondary-bg: #252a43;
+          --btn-secondary-color: #60a5fa;
+          --btn-secondary-hover: #2d3247;
+          --result-bg: #1a1d33;
+          --result-border: #2d3247;
+          --result-text: #e5e7eb;
+          --result-highlight: #60a5fa;
+          --result-placeholder: #6b7280;
+          --shadow: rgba(0, 0, 0, 0.4);
+          --shadow-hover: rgba(255, 107, 53, 0.4);
+        }
+      }
+
+      body {
+        font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+        min-height: 100vh;
+        padding: 24px 12px;
+        transition: background 0.3s ease;
+      }
+      .container {
+        background: var(--container-bg);
+        max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px var(--shadow);
+        padding: 40px;
+        transition: all 0.3s ease;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .header-icon {
+        font-size: 32px;
+      }
+      h2 {
+        color: var(--heading-color);
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      p {
+        color: var(--text-color);
+        margin-bottom: 32px;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+      .form-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+        border: 1px solid var(--card-border);
+        transition: all 0.3s ease;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+      }
+      label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      input[type="number"] {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid var(--input-border);
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: var(--input-bg);
+        color: var(--result-text);
+      }
+      input[type="number"]:focus {
+        outline: none;
+        border-color: var(--input-focus);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        transform: translateY(-1px);
+      }
+      .button-group {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      button {
+        padding: 16px 32px;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px var(--shadow);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      #predict-btn {
+        background: var(--btn-primary-bg);
+        color: white;
+        flex: 2;
+        min-width: 180px;
+      }
+      #predict-btn:hover:not(:disabled) {
+        background: var(--btn-primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--shadow-hover);
+      }
+      #predict-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      #model-info-btn {
+        background: var(--btn-secondary-bg);
+        color: var(--btn-secondary-color);
+        border: 2px solid var(--btn-secondary-color);
+        flex: 1;
+        min-width: 140px;
+      }
+      #model-info-btn:hover {
+        background: var(--btn-secondary-hover);
+        transform: translateY(-2px);
+      }
+      .result {
+        margin-top: 28px;
+        padding: 28px;
+        border-radius: 16px;
+        background: var(--result-bg);
+        border: 2px solid var(--result-border);
+        color: var(--result-text);
+        transition: all 0.3s ease;
+        min-height: 80px;
+        position: relative;
+      }
+      .result:empty:before {
+        content: 'Enter features and click Predict to see the estimated price';
+        color: var(--result-placeholder);
+        font-size: 14px;
+        font-style: italic;
+      }
+      .prediction-display {
+        text-align: center;
+      }
+      .prediction-label {
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-color);
+        margin-bottom: 8px;
+      }
+      .prediction-value {
+        font-size: 48px;
+        font-weight: 800;
+        color: var(--result-highlight);
+        letter-spacing: -1px;
+        text-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+      }
+      .info-display {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 13px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        line-height: 1.6;
+      }
+      @media (max-width: 640px) {
+        .container { padding: 24px; }
+        h2 { font-size: 26px; }
+        .row { grid-template-columns: 1fr; }
+        .prediction-value { font-size: 36px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="header-icon">🏠</span>
+        <h2>California House Price Predictor</h2>
+      </div>
+      <p>Adjust the sliders to estimate house prices. High-value properties (>$400k) are flagged in the history.</p>
+      <form id="predict-form" onsubmit="return false;">
+        <div class="form-card">
+          <div class="row">
+            <div class="input-group"><label>Median Income (Tens of $1000s)</label><input id="f1" type="number" step="any" value="8.3252"></div>
+            <div class="input-group"><label>House Age (Years)</label><input id="f2" type="number" step="any" value="41.0"></div>
+            <div class="input-group"><label>Average Rooms</label><input id="f3" type="number" step="any" value="6.98"></div>
+            <div class="input-group"><label>Average Bedrooms</label><input id="f4" type="number" step="any" value="1.02"></div>
+            <div class="input-group"><label>Population</label><input id="f5" type="number" step="any" value="322"></div>
+            <div class="input-group"><label>Average Occupancy</label><input id="f6" type="number" step="any" value="2.55"></div>
+            <div class="input-group"><label>Latitude (CA Region)</label><input id="f7" type="number" step="any" value="37.88"></div>
+            <div class="input-group"><label>Longitude (CA Region)</label><input id="f8" type="number" step="any" value="-122.23"></div>
+          </div>
+        </div>
+        <div class="button-group">
+          <button id="predict-btn" type="button">🔮 Predict Price</button>
+          <button id="model-info-btn" type="button">ℹ️ Model Info</button>
+        </div>
+      </form>
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+  const base = (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null')
+    ? 'http://127.0.0.1:1000'
+    : window.location.origin;
+
+  async function safeParseResponse(response) {
+    if (response.status === 204) return null;
+    const ct = (response.headers.get('content-type') || '').toLowerCase();
+    const text = await response.text();
+    if (!text) return null;
+    if (ct.includes('application/json')) {
+      try { return JSON.parse(text); } catch (e) { return { __parse_error: text }; }
+    }
+    return { __text: text };
+  }
+
+  async function doPredict() {
+    const vals = [];
+    for (let i = 1; i <= 8; i++) vals.push(Number(document.getElementById('f' + i).value));
+    const resBox = document.getElementById('result');
+    resBox.innerHTML = '<div class="prediction-display"><div class="prediction-label">Calculating...</div></div>';
+    document.getElementById('predict-btn').disabled = true;
+    try {
+      const r = await fetch(base + '/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ data: vals })
+      });
+      const j = await safeParseResponse(r);
+      if (!r.ok) {
+        const detail = j && (j.detail || j.__text || JSON.stringify(j)) || `status ${r.status}`;
+        resBox.innerHTML = '<div class="info-display">Error: ' + detail + '</div>';
+      } else {
+        if (j === null) {
+          resBox.innerHTML = '<div class="info-display">No content returned. Status: ' + r.status + '</div>';
+        } else if (j && typeof j.prediction !== 'undefined') {
+          const price = j.prediction;
+          const formattedPrice = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 }).format(price * 100000);
+          resBox.innerHTML = '<div class="prediction-display"><div class="prediction-label">Predicted Price</div><div class="prediction-value">' + formattedPrice + '</div></div>';
+        } else {
+          resBox.innerHTML = '<div class="info-display">Response: ' + JSON.stringify(j) + '</div>';
+        }
+      }
+    } catch (err) {
+      resBox.innerHTML = '<div class="info-display">Request failed: ' + err + '</div>';
+    } finally {
+      document.getElementById('predict-btn').disabled = false;
+    }
+  }
+
+  document.getElementById('predict-btn').addEventListener('click', doPredict);
+
+  document.getElementById('model-info-btn').addEventListener('click', async () => {
+    const resBox = document.getElementById('result');
+    resBox.innerHTML = '<div class="info-display">Fetching model info...</div>';
+    try {
+      const r = await fetch(base + '/model_info', { headers: { 'Accept': 'application/json' } });
+      const j = await safeParseResponse(r);
+      if (!r.ok) {
+        const detail = j && (j.detail || j.__text || JSON.stringify(j)) || `status ${r.status}`;
+        resBox.innerHTML = '<div class="info-display">Error: ' + detail + '</div>';
+      } else {
+        resBox.innerHTML = j === null ? '<div class="info-display">No content returned.</div>' : '<div class="info-display">Model info:\n' + JSON.stringify(j, null, 2) + '</div>';
+      }
+    } catch (err) {
+      resBox.innerHTML = '<div class="info-display">Request failed: ' + err + '</div>';
+    }
+  });
+});
+</script>
+  </body>
+</html>
